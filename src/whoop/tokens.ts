@@ -22,8 +22,15 @@ export async function clearOwner(env: Env): Promise<void> {
   await env.WHOOP_TOKENS.delete(KEY)
 }
 
-/** True if an owner token blob exists */
-export async function ownerConnected(env: Env): Promise<boolean> {
-  const raw = await env.WHOOP_TOKENS.get(KEY)
-  return raw !== null
+/**
+ * WHOOP link state for /health. `expired` means the access token has lapsed: the cron refreshes
+ * every 45 minutes or less and a token lasts about 59, so a healthy link never reaches it.
+ * It usually means WHOOP rejected the refresh token and the owner must visit /connect.
+ */
+export async function ownerStatus(env: Env): Promise<"connected" | "expired" | "missing"> {
+  const tokens = await loadOwner(env)
+  if (!tokens) {
+    return "missing"
+  }
+  return Date.now() >= tokens.expires_at ? "expired" : "connected"
 }

@@ -192,7 +192,7 @@ One object default export. Do **not** export the MCP handler function as `defaul
 
 | Path | Auth | Behavior |
 | --- | --- | --- |
-| `GET /health` | none | `{ ok: true, whoop_connected: boolean }` — no tokens, no email |
+| `GET /health` | none | `{ ok: true, whoop_connected: boolean, whoop: "connected" \| "expired" \| "missing" }`. `expired` means the stored access token has lapsed, so cron refresh is failing. No tokens, no email. |
 | `GET /connect` | none (form) or `whoop_connect` cookie | No token: HTML form (`POST /connect`). Cookie: start OAuth (see [Connect token handling](#connect-token-handling)). |
 | `GET /connect?token=` | `CONNECT_TOKEN` or `MCP_TOKEN` | Validate, set `whoop_connect` cookie, **302 to `/connect` with no query** so the secret leaves the address bar before WHOOP |
 | `POST /connect` | token in form body (preferred) | Same as cookie path: CSRF cookie + 302 to WHOOP |
@@ -943,7 +943,7 @@ Greenfield. The public surface is HTTP + MCP tools, not a library.
 
 | Method | Path | Auth | Request | Response |
 | --- | --- | --- | --- | --- |
-| GET | `/health` | public | — | `{"ok":true,"whoop_connected":false}` |
+| GET | `/health` | public | — | `{"ok":true,"whoop_connected":false,"whoop":"missing"}` |
 | GET | `/connect` | form, `whoop_connect` cookie, or `?token=` (see connect flow) | — | HTML form, 302 `/connect`, or 302 WHOOP |
 | POST | `/connect` | `token` form body | `application/x-www-form-urlencoded` | 302 to WHOOP (`Referrer-Policy: no-referrer`) |
 | GET | `/whoop/callback` | state cookie | `code`, `state` | HTML |
