@@ -41,7 +41,7 @@ export function mcpTokenFromRequest(request: Request): string | null {
   return parseBearer(request.headers.get("X-Api-Key"))
 }
 
-/** 401 unless Authorization matches MCP_TOKEN; localhost may skip if unset */
+/** 401 unless Authorization matches MCP_TOKEN or an MCP_CLIENT_TOKENS entry; localhost may skip if unset */
 export async function requireMcpBearer(
   request: Request,
   env: Env,
@@ -58,7 +58,12 @@ export async function requireMcpBearer(
   if (!provided) {
     return unauthorized()
   }
-  const ok = await secretsEqual(provided, token)
+  // MCP_TOKEN plus each MCP_CLIENT_TOKENS entry. Every candidate is compared so timing doesn't reveal which matched.
+  const candidates = [token, ...(env.MCP_CLIENT_TOKENS ?? "").split(",").map((t) => t.trim()).filter(Boolean)]
+  let ok = false
+  for (const candidate of candidates) {
+    ok = (await secretsEqual(provided, candidate)) || ok
+  }
   if (!ok) {
     return unauthorized()
   }
