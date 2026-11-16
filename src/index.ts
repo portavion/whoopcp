@@ -4,7 +4,7 @@ import type { Env } from "./env.ts"
 import { createWhoopServer } from "./mcp.ts"
 import { WhoopClient, WhoopDisconnected } from "./whoop/client.ts"
 import { disconnect, handleCallback, startConnect } from "./whoop/oauth.ts"
-import { ownerConnected } from "./whoop/tokens.ts"
+import { ownerStatus } from "./whoop/tokens.ts"
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -58,8 +58,8 @@ export default {
 } satisfies ExportedHandler<Env>
 
 async function health(env: Env): Promise<Response> {
-  const connected = await ownerConnected(env)
-  return Response.json({ ok: true, whoop_connected: connected })
+  const whoop = await ownerStatus(env)
+  return Response.json({ ok: true, whoop_connected: whoop === "connected", whoop })
 }
 
 function privacy(): Response {

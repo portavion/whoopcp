@@ -132,7 +132,7 @@ Open `$HOST/connect`, paste `CONNECT_TOKEN`, consent. Then:
 curl "$HOST/health"
 ```
 
-Expect `{"ok":true,"whoop_connected":true}`. `/health` only checks that a KV blob exists. It does not prove the refresh token still works. A Worker cron refreshes at minute 0 and 45.
+Expect `{"ok":true,"whoop_connected":true,"whoop":"connected"}`. A Worker cron refreshes at minute 0 and 45. `"whoop":"expired"` means those refreshes stopped working, usually because WHOOP rejected the refresh token: open `/connect` again. `"missing"` means WHOOP was never connected.
 
 Do not open `/connect` before WHOOP secrets are set.
 
